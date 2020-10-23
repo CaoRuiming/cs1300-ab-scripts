@@ -5,11 +5,11 @@ from scipy.stats import chi2
 from abtesting_test import *
 
 # You can comment out these lines! They are just here to help follow along to the tutorial.
-print(t_dist.cdf(-2, 20)) # should print .02963
-print(t_dist.cdf(2, 20)) # positive t-score (bad), should print .97036 (= 1 - .2963)
+# print(t_dist.cdf(-2, 20)) # should print .02963
+# print(t_dist.cdf(2, 20)) # positive t-score (bad), should print .97036 (= 1 - .2963)
 
-print(chi2.cdf(23.6, 12)) # prints 0.976
-print(1 - chi2.cdf(23.6, 12)) # prints 1 - 0.976 = 0.023 (yay!)
+# print(chi2.cdf(23.6, 12)) # prints 0.976
+# print(1 - chi2.cdf(23.6, 12)) # prints 1 - 0.976 = 0.023 (yay!)
 
 # TODO: Fill in the following functions! Be sure to delete "pass" when you want to use/run a function!
 # NOTE: You should not be using any outside libraries or functions other than the simple operators (+, **, etc)
@@ -28,14 +28,27 @@ def slice_2D(list_2D, start_row, end_row, start_col, end_col):
 
     return to_append
 
+def get_sum(nums):
+    '''
+    Helper function for calculating the sum of a collections of numbers.
+    :param nums: list of numbers
+    :return: sum of list
+    '''
+    total = 0
+    for num in nums:
+        total += num
+    return total
+
 def get_avg(nums):
     '''
     Helper function for calculating the average of a sample.
     :param nums: list of numbers
     :return: average of list
     '''
-    #TODO: fill me in!
-    pass
+    total = 0.0
+    for num in nums:
+        total += num
+    return num / len(nums)
 
 def get_stdev(nums):
     '''
@@ -43,8 +56,10 @@ def get_stdev(nums):
     :param nums: list of numbers
     :return: standard deviation of list
     '''
-    #TODO: fill me in!
-    pass
+    avg = get_avg(nums)
+    numerator = get_sum([(num - avg) for num in nums])
+    denominator = len(nums) - 1
+    return (numerator / denominator) ** 0.5
 
 def get_standard_error(a, b):
     '''
@@ -53,8 +68,8 @@ def get_standard_error(a, b):
     :param b: list of numbers
     :return: standard error of a and b (see studio 6 guide for this equation!)
     '''
-    #TODO: fill me in!
-    pass
+    number = (((get_stdev(a)) ** 2) / len(a)) + (((get_stdev(b)) ** 2) / len(b))
+    return number ** 0.5
 
 def get_2_sample_df(a, b):
     '''
@@ -64,8 +79,12 @@ def get_2_sample_df(a, b):
     :return: integer representing the degrees of freedom between a and b (see studio 6 guide for this equation!)
     HINT: you can use Math.round() to help you round!
     '''
-    #TODO: fill me in!
-    pass
+    numerator = get_standard_error(a, b) ** 4
+
+    std_a = get_stdev(a)
+    std_b = get_stdev(b)
+    denominator = ((((std_a**2)/len(a))**2) / (len(a) - 1)) + ((((std_b**2)/len(b))**2) / (len(b) - 1))
+    return round(numerator / denominator)
 
 def get_t_score(a, b):
     '''
@@ -74,8 +93,7 @@ def get_t_score(a, b):
     :param b: list of numbers
     :return: number representing the t-score given lists a and b (see studio 6 guide for this equation!)
     '''
-    #TODO: fill me in!
-    pass
+    return (get_avg(a) - get_avg(b)) / get_standard_error(a, b)
 
 def perform_2_sample_t_test(a, b):
     '''
@@ -86,15 +104,30 @@ def perform_2_sample_t_test(a, b):
     :return: calculated p-value
     HINT: the t_dist.cdf() function might come in handy!
     '''
-    #TODO: fill me in!
-    pass
+    t_score = get_t_score(a, b)
+    t_score = t_score if t_score < 0 else -t_score
+    return t_dist.cdf(t_score, get_2_sample_df(a, b))
 
 
 # [OPTIONAL] Some helper functions that might be helpful in get_expected_grid().
-# def row_sum(observed_grid, ele_row):
-# def col_sum(observed_grid, ele_col):
-# def total_sum(observed_grid):
-# def calculate_expected(row_sum, col_sum, tot_sum):
+def row_sum(observed_grid, ele_row):
+    total = 0
+    for val in observed_grid[ele_row]:
+        total += val
+    return total
+def col_sum(observed_grid, ele_col):
+    total = 0
+    for row in observed_grid:
+        total += row[ele_col]
+    return total
+def total_sum(observed_grid):
+    total = 0
+    for row in observed_grid:
+        for cell in row:
+            total += cell
+    return total
+def calculate_expected(row_sum, col_sum, tot_sum):
+    return (row_sum * col_sum) / tot_sum
 
 def get_expected_grid(observed_grid):
     '''
@@ -104,8 +137,17 @@ def get_expected_grid(observed_grid):
     :return: 2D list of expected counts
     HINT: To clean up this calculation, consider filling in the optional helper functions below!
     '''
-    #TODO: fill me in!
-    pass
+    num_rows = len(observed_grid)
+    num_cols = len(observed_grid[0])
+    result = [[None for _ in range(num_cols)] for _ in range(num_rows)]
+    for row_idx in range(num_rows):
+        for col_idx in range(num_cols):
+            result[row_idx][col_idx] = calculate_expected(
+                row_sum(observed_grid, row_idx),
+                col_sum(observed_grid, col_idx),
+                total_sum(observed_grid)
+            )
+    return result
 
 def df_chi2(observed_grid):
     '''
@@ -113,8 +155,9 @@ def df_chi2(observed_grid):
     :param observed_grid: 2D list of observed counts
     :return: degrees of freedom of expected counts (see studio 6 guide for this equation!)
     '''
-    #TODO: fill me in!
-    pass
+    num_rows = len(observed_grid)
+    num_cols = len(observed_grid[0])
+    return (num_rows - 1) * (num_cols - 1)
 
 def chi2_value(observed_grid):
     '''
@@ -122,8 +165,16 @@ def chi2_value(observed_grid):
     :param observed_grid: 2D list of observed counts
     :return: associated chi^2 value of expected counts (see studio 6 guide for this equation!)
     '''
-    #TODO: fill me in!
-    pass
+    expected_grid = get_expected_grid(observed_grid)
+    num_rows = len(observed_grid)
+    num_cols = len(observed_grid[0])
+    result = 0
+    for row_idx in range(num_rows):
+        for col_idx in range(num_cols):
+            observed = observed_grid[row_idx][col_idx]
+            expected = expected_grid[row_idx][col_idx]
+            result += ((observed - expected)**2) / expected 
+    return result
 
 def perform_chi2_homogeneity_test(observed_grid):
     '''
@@ -133,8 +184,8 @@ def perform_chi2_homogeneity_test(observed_grid):
     :return: calculated p-value
     HINT: the chi2.cdf() function might come in handy!
     '''
-    #TODO: fill me in!
-    pass
+    chi2_val = chi2_value(observed_grid)
+    return 1 - chi2.cdf(chi2_val, df_chi2(observed_grid))
 
 # These commented out lines are for testing your main functions. 
 # Please uncomment them when finished with your implementation and confirm you get the same values :)
@@ -147,13 +198,14 @@ def data_to_num_list(s):
     '''
   return list(map(float, s.split()))
 
-"""
+
 # t_test 1:
 a_t1_list = data_to_num_list(a1) 
 b_t1_list = data_to_num_list(b1)
 print(get_t_score(a_t1_list, b_t1_list)) # this should be -129.500
 print(perform_2_sample_t_test(a_t1_list, b_t1_list)) # this should be 0.0000
 # why do you think this is? Take a peek at a1 and b1 in abtesting_test.py :)
+"""
 
 # t_test 2:
 a_t2_list = data_to_num_list(a2) 
