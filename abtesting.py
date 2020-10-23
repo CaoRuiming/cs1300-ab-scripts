@@ -93,7 +93,8 @@ def get_t_score(a, b):
     :param b: list of numbers
     :return: number representing the t-score given lists a and b (see studio 6 guide for this equation!)
     '''
-    return (get_avg(a) - get_avg(b)) / get_standard_error(a, b)
+    t_score = (get_avg(a) - get_avg(b)) / get_standard_error(a, b)
+    return t_score if t_score < 0 else -t_score
 
 def perform_2_sample_t_test(a, b):
     '''
@@ -104,9 +105,7 @@ def perform_2_sample_t_test(a, b):
     :return: calculated p-value
     HINT: the t_dist.cdf() function might come in handy!
     '''
-    t_score = get_t_score(a, b)
-    t_score = t_score if t_score < 0 else -t_score
-    return t_dist.cdf(t_score, get_2_sample_df(a, b))
+    return t_dist.cdf(get_t_score(a, b), get_2_sample_df(a, b))
 
 
 # [OPTIONAL] Some helper functions that might be helpful in get_expected_grid().
