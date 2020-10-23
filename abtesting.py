@@ -45,10 +45,10 @@ def get_avg(nums):
     :param nums: list of numbers
     :return: average of list
     '''
-    total = 0.0
+    total = 0
     for num in nums:
         total += num
-    return num / len(nums)
+    return total / len(nums)
 
 def get_stdev(nums):
     '''
@@ -57,7 +57,7 @@ def get_stdev(nums):
     :return: standard deviation of list
     '''
     avg = get_avg(nums)
-    numerator = get_sum([(num - avg) for num in nums])
+    numerator = get_sum([((num - avg)**2) for num in nums])
     denominator = len(nums) - 1
     return (numerator / denominator) ** 0.5
 
@@ -68,7 +68,7 @@ def get_standard_error(a, b):
     :param b: list of numbers
     :return: standard error of a and b (see studio 6 guide for this equation!)
     '''
-    number = (((get_stdev(a)) ** 2) / len(a)) + (((get_stdev(b)) ** 2) / len(b))
+    number = ((get_stdev(a) ** 2) / len(a)) + ((get_stdev(b) ** 2) / len(b))
     return number ** 0.5
 
 def get_2_sample_df(a, b):
@@ -199,13 +199,13 @@ def data_to_num_list(s):
   return list(map(float, s.split()))
 
 
+"""
 # t_test 1:
 a_t1_list = data_to_num_list(a1) 
 b_t1_list = data_to_num_list(b1)
 print(get_t_score(a_t1_list, b_t1_list)) # this should be -129.500
 print(perform_2_sample_t_test(a_t1_list, b_t1_list)) # this should be 0.0000
 # why do you think this is? Take a peek at a1 and b1 in abtesting_test.py :)
-"""
 
 # t_test 2:
 a_t2_list = data_to_num_list(a2) 
